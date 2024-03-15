@@ -1,19 +1,56 @@
-﻿using System.Text;
+﻿using System.Data;
+using System.Text;
+using Microsoft.Data.Sqlite;
 
 public class Program
 {
     public static void Main(String[] args)
     {
-        // List<string> interactionNames = new List<string>();
+        string gameInstallPath = "D:\\SteamLibrary\\steamapps\\common\\Crusader Kings III";
+
+        List<Playset> playsets = fetchPlaysets(gameInstallPath);
+
+        Console.WriteLine("Playsets:");
+        for (int i = 0; i < playsets.Count; i++)
+        {
+            Playset playset = playsets[i];
+            Console.WriteLine("  " +(i+1) + ": " + playset.name);
+            foreach (Mod mod in playset.mods)
+                Console.WriteLine("    - " + mod.name);
+        }
+        Console.WriteLine("");
+
+        Playset selectedPlayset = null;
+
+        while (true)
+        {
+            Console.Write("Choose a playset (1-" + (playsets.Count + 1) + "): ");
+            string read = Console.ReadLine();
+
+            if (int.TryParse(read, out int selectedIndex))
+            {
+                if (selectedIndex >= 1 && selectedIndex <= playsets.Count)
+                {
+                    selectedPlayset = playsets[selectedIndex-1];
+                    break;
+                }
+            }
+        }
+
+        Console.WriteLine("Using playset " + selectedPlayset.name);
 
         List<string> sourcePaths = new List<string>()
         {
-            "D:\\SteamLibrary\\steamapps\\common\\Crusader Kings III\\game",
-            "D:\\ckmodsmak\\1158310\\2887120253"
+            gameInstallPath + "\\game",
         };
 
-        string modFolder = "C:\\Users\\wheybags\\Documents\\Paradox Interactive\\Crusader Kings III\\mod\\nomore";
+        string outputModFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Paradox Interactive\\Crusader Kings III\\mod\\nomore";
 
+        foreach (Mod mod in selectedPlayset.mods)
+        {
+            if (mod.path != outputModFolder)
+                sourcePaths.Add(mod.path);
+        }
 
         HashSet<string> dataFileRelativePaths = new HashSet<string>();
         foreach (string sourcePath in sourcePaths)
@@ -30,10 +67,13 @@ public class Program
             }
         }
 
-
+        if (Directory.Exists(outputModFolder))
+            Directory.Delete(outputModFolder, true);
 
         foreach (string relativePath in dataFileRelativePaths)
         {
+            Console.WriteLine("Generating " + relativePath);
+
             string sourcePath = null;
             for (int i = sourcePaths.Count - 1; i >= 0; i--)
             {
@@ -87,26 +127,118 @@ public class Program
                 }
 
                 commonInteractionItem.valueString = "yes";
-
-                // bool debugOnly = false;
-                // CkKeyValuePair? isShownItem = item.valueObject.findFirstWithName("is_shown");
-                // if (isShownItem != null)
-                // {
-                //     CkKeyValuePair? debugOnlyitem = isShownItem.valueObject.findFirstWithName("debug_only");
-                //     if (debugOnlyitem != null)
-                //         debugOnly = debugOnlyitem.valueString == "yes";
-                // }
-                //
-                //
-                // if (!debugOnly)
-                //     interactionNames.Add(item.key);
             }
 
 
             string serialised = serialiseCkObject(data);
-            string outputPath = modFolder + "\\" + relativePath;
+            string outputPath = outputModFolder + "\\" + relativePath;
+            Directory.CreateDirectory(Directory.GetParent(outputPath).FullName);
             File.WriteAllText(outputPath, serialised);
         }
+
+        string dotModData = @"version=""1.0""
+tags={
+	""Gui""
+	""Fixes""
+}
+name=""No More""".Replace("\r\n", "\n");
+
+        File.WriteAllText(outputModFolder + "\\descriptor.mod", dotModData);
+        File.WriteAllText(Directory.GetParent(outputModFolder).FullName + "\\nomore.mod", dotModData + "\npath=\"" + outputModFolder.Replace("\\", "/") + "\"");
+
+        Console.WriteLine("done!");
+        Console.WriteLine("");
+        Console.WriteLine("Now, in the game launcher, edit the \"" + selectedPlayset.name + "\" playset, and enable the mod \"No More\"");
+        Console.WriteLine("Make sure it is always last in the load order!");
+        Console.WriteLine("");
+        Console.WriteLine("Press enter to close");
+        Console.ReadLine();
+    }
+
+    public class Mod
+    {
+        public string name;
+        public string path;
+    }
+
+    public class Playset
+    {
+        public string id;
+        public string name;
+        public List<Mod> mods = new List<Mod>();
+    }
+
+    public static List<Playset> fetchPlaysets(string gameInstallPath)
+    {
+        string sqlitePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Paradox Interactive\\Crusader Kings III\\launcher-v2.sqlite";
+        using SqliteConnection connection = new SqliteConnection("Data Source=" + sqlitePath + ";Mode=ReadOnly");
+        connection.Open();
+
+        List<Playset> playsets = new List<Playset>();
+        {
+            using SqliteCommand selectPlaysetsCommand = connection.CreateCommand();
+            selectPlaysetsCommand.CommandText = @"
+            SELECT id, name
+            FROM playsets
+        ";
+
+            using var reader = selectPlaysetsCommand.ExecuteReader();
+            while (reader.Read())
+            {
+                Playset playset = new Playset();
+                playset.id = reader.GetString(0);
+                playset.name = reader.GetString(1);
+                playsets.Add(playset);
+            }
+        }
+
+        foreach (Playset playset in playsets)
+        {
+            using SqliteCommand selectPlaysetModsCommand = connection.CreateCommand();
+            selectPlaysetModsCommand.CommandText = @"
+                SELECT mods.steamId, mods.gameRegistryId, mods.displayName
+                FROM playsets_mods
+                INNER JOIN mods ON playsets_mods.modId=mods.id
+                WHERE playsets_mods.playsetId = $id AND playsets_mods.enabled = 1
+                ORDER BY playsets_mods.position
+            ";
+
+            selectPlaysetModsCommand.Parameters.AddWithValue("id", playset.id);
+
+            using var reader = selectPlaysetModsCommand.ExecuteReader();
+            while (reader.Read())
+            {
+                string steamId = null;
+                if (!reader.IsDBNull(0))
+                    steamId = reader.GetString(0);
+
+                string gameRegistryId = reader.GetString(1);
+                string displayName = reader.GetString(2);
+
+
+                Mod mod = new Mod();
+                if (steamId != null)
+                {
+                    string steamappsFolder = new DirectoryInfo(gameInstallPath).Parent.Parent.FullName;
+                    mod.path = steamappsFolder + "\\workshop\\content\\1158310\\" + steamId;
+                }
+                else
+                {
+                    // gameRegistryId is something like "mod/ugc_2887120253.mod"
+                    string relativePath = gameRegistryId.Replace("/", "\\").Substring(0, gameRegistryId.Length - 4);
+                    mod.path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Paradox Interactive\\Crusader Kings III\\" + relativePath;
+                }
+
+                mod.name = displayName;
+
+                if (!Directory.Exists(mod.path))
+                    throw new Exception("Mod path not found");
+
+                playset.mods.Add(mod);
+            }
+        }
+
+        return playsets;
     }
 
     public static string serialiseCkObject(CkObject obj)
