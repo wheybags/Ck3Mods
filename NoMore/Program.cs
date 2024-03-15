@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 
 public class Program
 {
@@ -140,7 +141,7 @@ public class Program
             string serialised = CkObject.serialise(data);
             string outputPath = outputModFolder + "\\" + relativePath;
             Directory.CreateDirectory(Directory.GetParent(outputPath).FullName);
-            File.WriteAllText(outputPath, serialised);
+            File.WriteAllText(outputPath, serialised, Encoding.UTF8);
         }
 
         string dotModData = "version=\"1.0\"\n" +

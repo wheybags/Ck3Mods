@@ -1,6 +1,4 @@
-﻿
-
-using System.Text;
+﻿using System.Text;
 
 public class CkObject
 {
