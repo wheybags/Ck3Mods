@@ -37,11 +37,21 @@ public class CkObject
                 stringBuilder.Append(pair.operatorString);
             }
 
-            stringBuilder.Append(pair.whitespaceBeforeValue);
             if (pair.valueIsString)
+            {
+                stringBuilder.Append(pair.whitespaceBeforeValue);
+
                 stringBuilder.Append(pair.valueString);
+            }
             else
             {
+                if (pair.typeTag != null)
+                {
+                    stringBuilder.Append(pair.whitespaceBeforeTypeTag);
+                    stringBuilder.Append(pair.typeTag);
+                }
+
+                stringBuilder.Append(pair.whitespaceBeforeValue);
                 stringBuilder.Append("{");
                 serialise(stringBuilder, pair.valueObject);
                 stringBuilder.Append("}");
@@ -56,8 +66,10 @@ public class CkKeyValuePair
 {
     public string whitespaceBeforeKeyName = " ";
     public string whitespaceBeforeOperator = " ";
+    public string whitespaceBeforeTypeTag = " ";
     public string whitespaceBeforeValue = " ";
 
+    public string typeTag = null;
     public string key = null;
     public string operatorString = "=";
 

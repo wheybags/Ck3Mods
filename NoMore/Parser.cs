@@ -3,7 +3,9 @@
 // Item                 = $String ItemRest | "{" ObjectBody "}"
 // ItemRest             = Operator AfterOperator | Nil
 // Operator             = "=" | ">=" | "?=" | "<=" | "==" | "<" | ">"
-// AfterOperator        = $String | "{" ObjectBody "}"
+// AfterOperator        = $String MaybeObject | "{" ObjectBody "}"
+// MaybeObject          = "{" ObjectBody "}" | Nil
+
 
 public class Parser
 {
@@ -164,7 +166,9 @@ public class Parser
         if (peek().type == Token.Type.String)
         {
             pair.whitespaceBeforeValue = peek().ignoredTextBeforeToken;
-            pair.valueString = pop().stringValue;
+
+            Token startToken = pop();
+            parseMaybeObject(startToken, pair);
         }
         else if (peek().type == Token.Type.OpenBrace)
         {
@@ -178,6 +182,30 @@ public class Parser
         else
         {
             throw new Exception("expected String or {");
+        }
+    }
+
+    private void parseMaybeObject(Token startToken, CkKeyValuePair pair)
+    {
+        if (peek().type == Token.Type.OpenBrace)
+        {
+            pair.whitespaceBeforeTypeTag = startToken.ignoredTextBeforeToken;
+            pair.typeTag = startToken.stringValue;
+
+            pair.whitespaceBeforeValue = peek().ignoredTextBeforeToken;
+            if (pop().type != Token.Type.OpenBrace)
+                throw new Exception("expected {");
+
+            pair.valueObject = new CkObject();
+            parseObjectBody(pair.valueObject);
+
+            if (pop().type != Token.Type.CloseBrace)
+                throw new Exception("expected }");
+        }
+        else // todo: assert
+        {
+            pair.whitespaceBeforeValue = startToken.ignoredTextBeforeToken;
+            pair.valueString = startToken.stringValue;
         }
     }
 }

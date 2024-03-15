@@ -7,6 +7,7 @@
         testArray();
         testMixedArrayDict();
         testArrayInArray();
+        testTypeTag();
     }
 
     private static void assert(bool val)
@@ -92,5 +93,22 @@
         assert(subArray2.valuesList.Count == 2);
         assert(subArray2.valuesList[0].valueString == "c");
         assert(subArray2.valuesList[1].valueString == "d");
+    }
+
+    private static void testTypeTag()
+    {
+        string input = "color =  rgb   { 100 200 150 }";
+        CkObject data = Parser.parse(input);
+        assert(data.valuesList.Count == 1);
+        assert(data.valuesList[0].key == "color");
+        assert(data.valuesList[0].typeTag == "rgb");
+
+        CkObject color = data.valuesList[0].valueObject;
+        assert(color.valuesList.Count == 3);
+        assert(color.valuesList[0].valueString == "100");
+        assert(color.valuesList[1].valueString == "200");
+        assert(color.valuesList[2].valueString == "150");
+
+        assert(CkObject.serialise(data) == input);
     }
 }
