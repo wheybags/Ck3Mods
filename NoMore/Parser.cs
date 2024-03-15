@@ -51,29 +51,29 @@ public class Parser
         return parser.parseRoot();
     }
 
-    public List<Token> tokens;
+    public TokeniserOutput tokens;
     private int tokenIndex = 0;
-
-    private string tempBefore = "";
 
     Token peek()
     {
-        return tokens[tokenIndex];
+        return tokens.tokens[tokenIndex];
     }
 
     Token pop()
     {
-        Token retval = tokens[tokenIndex];
+        Token retval = tokens.tokens[tokenIndex];
         tokenIndex++;
         return retval;
     }
 
-    public CkObject parseRoot()
+    public CkObjectRoot parseRoot()
     {
-        CkObject root = new CkObject();
+        CkObjectRoot root = new CkObjectRoot();
         parseObjectBody(root);
         if (peek().type != Token.Type.FileEnd)
             throw new Exception("expected file end");
+
+        root.linesHaveCarriageReturns = tokens.linesHaveCarriageReturn;
         return root;
     }
 

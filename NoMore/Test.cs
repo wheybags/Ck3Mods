@@ -19,17 +19,17 @@
     private static void testNoSpaceBeforeCloseBracket()
     {
         string input = "scope:target = { exists = var:relic_religion}\n";
-        List<Token> tokens = Tokeniser.tokenise(input);
+        TokeniserOutput tokens = Tokeniser.tokenise(input);
 
-        assert(tokens.Count == 8);
-        assert(tokens[0].type == Token.Type.String && tokens[0].stringValue == "scope:target");
-        assert(tokens[1].type == Token.Type.Assign);
-        assert(tokens[2].type == Token.Type.OpenBrace);
-        assert(tokens[3].type == Token.Type.String && tokens[3].stringValue == "exists");
-        assert(tokens[4].type == Token.Type.Assign);
-        assert(tokens[5].type == Token.Type.String && tokens[5].stringValue == "var:relic_religion");
-        assert(tokens[6].type == Token.Type.CloseBrace);
-        assert(tokens[7].type == Token.Type.FileEnd);
+        assert(tokens.tokens.Count == 8);
+        assert(tokens.tokens[0].type == Token.Type.String && tokens.tokens[0].stringValue == "scope:target");
+        assert(tokens.tokens[1].type == Token.Type.Assign);
+        assert(tokens.tokens[2].type == Token.Type.OpenBrace);
+        assert(tokens.tokens[3].type == Token.Type.String && tokens.tokens[3].stringValue == "exists");
+        assert(tokens.tokens[4].type == Token.Type.Assign);
+        assert(tokens.tokens[5].type == Token.Type.String && tokens.tokens[5].stringValue == "var:relic_religion");
+        assert(tokens.tokens[6].type == Token.Type.CloseBrace);
+        assert(tokens.tokens[7].type == Token.Type.FileEnd);
 
         Parser parser = new Parser();
         parser.tokens = tokens;
@@ -44,7 +44,7 @@
         assert(subObject.valuesList[0].key == "exists");
         assert(subObject.valuesList[0].valueString == "var:relic_religion");
 
-        assert(CkObject.serialise(data) == input);
+        assert(data.serialise() == input);
     }
 
     private static void testOneString()
@@ -54,7 +54,7 @@
         assert(data.valuesList.Count == 1);
         assert(data.valuesList[0].valueString == "abc");
 
-        assert(CkObject.serialise(data) == input);
+        assert(data.serialise() == input);
     }
 
     private static void testArray()
@@ -69,7 +69,7 @@
         assert(array.valuesList[1].valueString == "\"b\"");
         assert(array.valuesList[2].valueString == "1.5");
 
-        assert(CkObject.serialise(data) == input);
+        assert(data.serialise() == input);
     }
 
     private static void testMixedArrayDict()
@@ -85,7 +85,7 @@
         assert(items.valuesList[2].key == "x" && items.valuesList[2].valueString == "10");
         assert(items.valuesList[3].valueString == "c");
 
-        assert(CkObject.serialise(data) == input);
+        assert(data.serialise() == input);
     }
 
     private static void testArrayInArray()
@@ -107,7 +107,7 @@
         assert(subArray2.valuesList[0].valueString == "c");
         assert(subArray2.valuesList[1].valueString == "d");
 
-        assert(CkObject.serialise(data) == input);
+        assert(data.serialise() == input);
     }
 
     private static void testTypeTag()
@@ -124,6 +124,6 @@
         assert(color.valuesList[1].valueString == "200");
         assert(color.valuesList[2].valueString == "150");
 
-        assert(CkObject.serialise(data) == input);
+        assert(data.serialise() == input);
     }
 }

@@ -138,7 +138,7 @@ public class Program
             }
 
 
-            string serialised = CkObject.serialise(data);
+            string serialised = data.serialise();
             string outputPath = outputModFolder + "\\" + relativePath;
             Directory.CreateDirectory(Directory.GetParent(outputPath).FullName);
             File.WriteAllText(outputPath, serialised, Encoding.UTF8);

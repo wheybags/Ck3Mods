@@ -24,11 +24,17 @@
     public int startColumn;
 }
 
+public class TokeniserOutput
+{
+    public List<Token> tokens = new List<Token>();
+    public bool linesHaveCarriageReturn = false;
+}
+
 public class Tokeniser
 {
-    public static List<Token> tokenise(string input)
+    public static TokeniserOutput tokenise(string input)
     {
-        List<Token> tokens = new List<Token>();
+        TokeniserOutput output = new TokeniserOutput();
 
         string accumulatedJunk = "";
         string accumulator = "";
@@ -85,7 +91,7 @@ public class Tokeniser
                     throw new Exception("invalid keyword");
             }
 
-            tokens.Add(newToken);
+            output.tokens.Add(newToken);
 
             accumulatedJunk = "";
             accumulator = "";
@@ -93,6 +99,9 @@ public class Tokeniser
 
         int column = 1;
         int row = 1;
+
+        int seenLF = 0;
+        int seenCRLF = 0;
 
         int characterIndex = 0;
 
@@ -115,6 +124,11 @@ public class Tokeniser
             char c = input[characterIndex];
             if (c == '\n')
             {
+                if (characterIndex > 0 && input[characterIndex - 1] == '\r')
+                    seenCRLF++;
+                else
+                    seenLF++;
+
                 row++;
                 column = 0;
             }
@@ -217,9 +231,11 @@ public class Tokeniser
         Token endToken = new Token();
         endToken.type = Token.Type.FileEnd;
         endToken.ignoredTextBeforeToken = accumulatedJunk;
-        tokens.Add(endToken);
+        output.tokens.Add(endToken);
 
-        return tokens;
+        output.linesHaveCarriageReturn = seenCRLF > seenLF;
+
+        return output;
     }
 
     private static bool isWhitespace(char c)

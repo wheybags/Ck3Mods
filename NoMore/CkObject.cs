@@ -1,5 +1,10 @@
 ﻿using System.Text;
 
+public class CkObjectRoot : CkObject
+{
+    public bool linesHaveCarriageReturns;
+}
+
 public class CkObject
 {
     public List<CkKeyValuePair> valuesList = new List<CkKeyValuePair>();
@@ -16,55 +21,18 @@ public class CkObject
         return null;
     }
 
-    public static string serialise(CkObject obj)
+    public string serialise()
     {
-        StringBuilder stringBuilder = new StringBuilder();
-        serialise(stringBuilder, obj);
-        return stringBuilder.ToString();
-    }
-
-    public static void serialise(StringBuilder stringBuilder, CkObject obj)
-    {
-        foreach (CkKeyValuePair pair in obj.valuesList)
-        {
-            if (pair.key != null)
-            {
-                stringBuilder.Append(pair.whitespaceBeforeKeyName);
-                stringBuilder.Append(pair.key);
-                stringBuilder.Append(pair.whitespaceBeforeOperator);
-                stringBuilder.Append(pair.operatorString);
-            }
-
-            if (pair.valueIsString)
-            {
-                stringBuilder.Append(pair.whitespaceBeforeValue);
-                stringBuilder.Append(pair.valueString);
-            }
-            else
-            {
-                if (pair.typeTag != null)
-                {
-                    stringBuilder.Append(pair.whitespaceBeforeTypeTag);
-                    stringBuilder.Append(pair.typeTag);
-                }
-
-                stringBuilder.Append(pair.whitespaceBeforeValue);
-                stringBuilder.Append("{");
-                serialise(stringBuilder, pair.valueObject);
-                stringBuilder.Append("}");
-            }
-        }
-
-        stringBuilder.Append(obj.whitespaceAfterLastValue);
+        return CkObjectSerialiser.serialise(this);
     }
 }
 
 public class CkKeyValuePair
 {
-    public string whitespaceBeforeKeyName = " ";
-    public string whitespaceBeforeOperator = " ";
-    public string whitespaceBeforeTypeTag = " ";
-    public string whitespaceBeforeValue = " ";
+    public string whitespaceBeforeKeyName = null;
+    public string whitespaceBeforeOperator = null;
+    public string whitespaceBeforeTypeTag = null;
+    public string whitespaceBeforeValue = null;
 
     public string typeTag = null;
     public string key = null;
