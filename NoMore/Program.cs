@@ -29,6 +29,9 @@ public class Program
     private static void generateMod()
     {
         string gameInstallPath = GamePaths.getGameInstallFolder();
+        if (gameInstallPath == null)
+            throw new Exception("Couldn't find CK3 install path!");
+
         Console.WriteLine("Found CK3 install at: " + gameInstallPath);
         Console.WriteLine("");
 
@@ -145,7 +148,7 @@ public class Program
                 if (interaction.valueIsString)
                     continue;
 
-                CkKeyValuePair? commonInteractionItem = interaction.valueObject.findFirstWithName("common_interaction");
+                CkKeyValuePair commonInteractionItem = interaction.valueObject.findFirstWithName("common_interaction");
 
                 if (commonInteractionItem == null)
                 {

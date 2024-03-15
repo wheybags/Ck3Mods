@@ -11,8 +11,6 @@ public class Parser
     public List<Token> tokens;
     private int tokenIndex = 0;
 
-    private string tempBefore = "";
-
     Token peek()
     {
         return tokens[tokenIndex];

@@ -7,7 +7,7 @@ public class CkObject
     public List<CkKeyValuePair> valuesList = new List<CkKeyValuePair>();
     public string whitespaceAfterLastValue = " ";
 
-    public CkKeyValuePair? findFirstWithName(string name)
+    public CkKeyValuePair findFirstWithName(string name)
     {
         foreach (CkKeyValuePair item in valuesList)
         {
@@ -63,7 +63,7 @@ public class CkKeyValuePair
 
     public bool valueIsString { get; private set; }
 
-    private string? _valueString;
+    private string _valueString;
     public string valueString {
         get
         {
@@ -78,7 +78,7 @@ public class CkKeyValuePair
         }
     }
 
-    private CkObject? _valueObject;
+    private CkObject _valueObject;
     public CkObject valueObject {
         get
         {
