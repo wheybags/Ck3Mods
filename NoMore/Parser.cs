@@ -8,8 +8,17 @@
 
 public class Parser
 {
+    public static CkObject parse(string inputString)
+    {
+        Parser parser = new Parser();
+        parser.tokens = Tokeniser.tokenise(inputString);
+        return parser.parseRoot();
+    }
+
     public List<Token> tokens;
     private int tokenIndex = 0;
+
+    private string tempBefore = "";
 
     Token peek()
     {

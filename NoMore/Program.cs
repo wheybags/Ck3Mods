@@ -4,6 +4,8 @@ public class Program
 {
     public static void Main(String[] args)
     {
+        Test.run();
+
         if (!Debugger.IsAttached)
         {
             try
@@ -116,32 +118,7 @@ public class Program
             }
 
             string fileData = File.ReadAllText(sourcePath);
-            // string fileData = File.ReadAllText("D:\\SteamLibrary\\steamapps\\common\\Crusader Kings III\\game\\common\\character_interactions\\00_debug_interactions.txt");
-
-
-            // string fileData = File.ReadAllText("C:\\users\\wheybags\\desktop\\test.txt");
-
-            // fileData = @"AND = { # Explicit AND to ensure no funny business";
-            //        fileData = @"text = ""mystical_ancestors_disinherit""
-            // 	}
-            // } >= asd";
-
-
-            //  fileData = @"scope:actor.dynasty = {
-            // 	dynasty_prestige >= medium_dynasty_prestige_value
-            // }";
-
-            // fileData = "scope:target = { exists = var:relic_religion}\n";
-
-
-            List<Token> tokens = Tokeniser.tokenise(fileData);
-
-            Parser parser = new Parser()
-            {
-                tokens = tokens
-            };
-
-            CkObject data = parser.parseRoot();
+            CkObject data = Parser.parse(fileData);
 
             foreach (CkKeyValuePair interaction in data.valuesList)
             {
