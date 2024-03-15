@@ -1,7 +1,6 @@
 ﻿// Root                 = ObjectBody $End
-// ObjectBody           = ObjectBody2 | Nil
-// ObjectBody2          = Item ObjectBody
-// Item                 = $String ItemRest
+// ObjectBody           = Item ObjectBody | Nil
+// Item                 = $String ItemRest | "{" ObjectBody "}"
 // ItemRest             = Operator AfterOperator | Nil
 // Operator             = "=" | ">=" | "?=" | "<=" | "==" | "<" | ">"
 // AfterOperator        = $String | "{" ObjectBody "}"
@@ -43,34 +42,44 @@ public class Parser
 
     private void parseObjectBody(CkObject obj)
     {
-        if (peek().type == Token.Type.String)
-            parseObjectBody2(obj);
-        else if (peek().type == Token.Type.FileEnd || peek().type == Token.Type.CloseBrace)
-            obj.whitespaceAfterLastValue = peek().ignoredTextBeforeToken;
-        else
-            throw new Exception("unexpected");
-    }
-
-    private void parseObjectBody2(CkObject obj)
-    {
-        if (peek().type == Token.Type.String)
+        if (peek().type == Token.Type.String || peek().type == Token.Type.OpenBrace)
         {
             parseItem(obj);
             parseObjectBody(obj);
         }
+        else if (peek().type == Token.Type.FileEnd || peek().type == Token.Type.CloseBrace)
+        {
+            obj.whitespaceAfterLastValue = peek().ignoredTextBeforeToken;
+        }
         else
         {
-            throw new Exception("expected String");
+            throw new Exception("unexpected");
         }
     }
 
     private void parseItem(CkObject obj)
     {
-        if (peek().type != Token.Type.String)
-            throw new Exception("expected BareString");
+        if (peek().type == Token.Type.String)
+        {
+            Token keyToken = pop();
+            parseItemRest(obj, keyToken);
+        }
+        else if (peek().type == Token.Type.OpenBrace)
+        {
+            CkKeyValuePair pair = new CkKeyValuePair();
+            obj.valuesList.Add(pair);
 
-        Token keyToken = pop();
-        parseItemRest(obj, keyToken);
+            pair.whitespaceBeforeValue = peek().ignoredTextBeforeToken;
+            pop();
+            pair.valueObject = new CkObject();
+            parseObjectBody(pair.valueObject);
+            if (pop().type != Token.Type.CloseBrace)
+                throw new Exception("expected }");
+        }
+        else
+        {
+            throw new Exception("unexpected");
+        }
     }
 
     private void parseItemRest(CkObject obj, Token keyToken)

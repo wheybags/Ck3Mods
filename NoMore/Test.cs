@@ -6,6 +6,7 @@
         testOneString();
         testArray();
         testMixedArrayDict();
+        testArrayInArray();
     }
 
     private static void assert(bool val)
@@ -72,5 +73,24 @@
         assert(items.valuesList[1].valueString == "b");
         assert(items.valuesList[2].key == "x" && items.valuesList[2].valueString == "10");
         assert(items.valuesList[3].valueString == "c");
+    }
+
+    private static void testArrayInArray()
+    {
+        CkObject data = Parser.parse("arr = { {a b} {c d} }");
+        assert(data.valuesList.Count == 1);
+
+        CkObject array = data.valuesList[0].valueObject;
+        assert(array.valuesList.Count == 2);
+
+        CkObject subArray1 = array.valuesList[0].valueObject;
+        assert(subArray1.valuesList.Count == 2);
+        assert(subArray1.valuesList[0].valueString == "a");
+        assert(subArray1.valuesList[1].valueString == "b");
+
+        CkObject subArray2 = array.valuesList[1].valueObject;
+        assert(subArray2.valuesList.Count == 2);
+        assert(subArray2.valuesList[0].valueString == "c");
+        assert(subArray2.valuesList[1].valueString == "d");
     }
 }
