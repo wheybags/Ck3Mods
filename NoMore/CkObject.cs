@@ -40,7 +40,6 @@ public class CkObject
             if (pair.valueIsString)
             {
                 stringBuilder.Append(pair.whitespaceBeforeValue);
-
                 stringBuilder.Append(pair.valueString);
             }
             else

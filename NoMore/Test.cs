@@ -18,7 +18,8 @@
 
     private static void testNoSpaceBeforeCloseBracket()
     {
-        List<Token> tokens = Tokeniser.tokenise("scope:target = { exists = var:relic_religion}\n");
+        string input = "scope:target = { exists = var:relic_religion}\n";
+        List<Token> tokens = Tokeniser.tokenise(input);
 
         assert(tokens.Count == 8);
         assert(tokens[0].type == Token.Type.String && tokens[0].stringValue == "scope:target");
@@ -42,18 +43,24 @@
         assert(subObject.valuesList.Count == 1);
         assert(subObject.valuesList[0].key == "exists");
         assert(subObject.valuesList[0].valueString == "var:relic_religion");
+
+        assert(CkObject.serialise(data) == input);
     }
 
     private static void testOneString()
     {
-        CkObject data = Parser.parse("abc");
+        string input = "abc";
+        CkObject data = Parser.parse(input);
         assert(data.valuesList.Count == 1);
         assert(data.valuesList[0].valueString == "abc");
+
+        assert(CkObject.serialise(data) == input);
     }
 
     private static void testArray()
     {
-        CkObject data = Parser.parse("arr = { a \"b\" 1.5 }");
+        string input = "arr = { a \"b\" 1.5 }";
+        CkObject data = Parser.parse(input);
         assert(data.valuesList.Count == 1);
 
         CkObject array = data.valuesList[0].valueObject;
@@ -61,11 +68,14 @@
         assert(array.valuesList[0].valueString == "a");
         assert(array.valuesList[1].valueString == "\"b\"");
         assert(array.valuesList[2].valueString == "1.5");
+
+        assert(CkObject.serialise(data) == input);
     }
 
     private static void testMixedArrayDict()
     {
-        CkObject data = Parser.parse("arr = { a b x = 10 c }");
+        string input = "arr = { a b x = 10 c }";
+        CkObject data = Parser.parse(input);
         assert(data.valuesList.Count == 1);
 
         CkObject items = data.valuesList[0].valueObject;
@@ -74,11 +84,14 @@
         assert(items.valuesList[1].valueString == "b");
         assert(items.valuesList[2].key == "x" && items.valuesList[2].valueString == "10");
         assert(items.valuesList[3].valueString == "c");
+
+        assert(CkObject.serialise(data) == input);
     }
 
     private static void testArrayInArray()
     {
-        CkObject data = Parser.parse("arr = { {a b} {c d} }");
+        string input = "arr = { {a b} {c d} }";
+        CkObject data = Parser.parse(input);
         assert(data.valuesList.Count == 1);
 
         CkObject array = data.valuesList[0].valueObject;
@@ -93,6 +106,8 @@
         assert(subArray2.valuesList.Count == 2);
         assert(subArray2.valuesList[0].valueString == "c");
         assert(subArray2.valuesList[1].valueString == "d");
+
+        assert(CkObject.serialise(data) == input);
     }
 
     private static void testTypeTag()

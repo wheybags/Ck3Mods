@@ -87,7 +87,6 @@ public class Parser
     private void parseItemRest(CkObject obj, Token keyToken)
     {
         CkKeyValuePair pair = new CkKeyValuePair();
-        pair.whitespaceBeforeKeyName = keyToken.ignoredTextBeforeToken;
 
         if (peek().type == Token.Type.Less ||
             peek().type == Token.Type.Greater ||
@@ -97,6 +96,7 @@ public class Parser
             peek().type == Token.Type.Assign ||
             peek().type == Token.Type.Equals)
         {
+            pair.whitespaceBeforeKeyName = keyToken.ignoredTextBeforeToken;
             pair.key = keyToken.stringValue;
 
             parseOperator(pair);
@@ -104,6 +104,7 @@ public class Parser
         }
         else // TODO: assert
         {
+            pair.whitespaceBeforeValue = keyToken.ignoredTextBeforeToken;
             pair.valueString = keyToken.stringValue;
             pair.operatorString = null;
         }
