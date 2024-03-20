@@ -16,13 +16,10 @@
 //   [[!skill] if = {} ]
 // }
 //
-// 4: Missing / extra closing braces are not supported
-// Apparently they "should" be
-//
-// 5: semicolons
+// 4: semicolons
 // Apparently you can put semicolons in certain places and they should be ignored. This isn't supported
 //
-// 6: this "list" syntax:
+// 5: this "list" syntax:
 // simple_cross_flag = {
 //     pattern = list "christian_emblems_list"
 //     color1 = list "normal_colors"
@@ -37,11 +34,12 @@ public class Parser
     // Grammar:
     // Root                 = ObjectBody $End
     // ObjectBody           = Item ObjectBody | Nil
-    // Item                 = $String ItemRest | "{" ObjectBody "}"
+    // Item                 = $String ItemRest | "{" ObjectBody CloseBrace
     // ItemRest             = Operator AfterOperator | Nil
     // Operator             = "=" | ">=" | "?=" | "<=" | "==" | "<" | ">"
-    // AfterOperator        = $String MaybeObject | "{" ObjectBody "}"
-    // MaybeObject          = "{" ObjectBody "}" | Nil
+    // AfterOperator        = $String MaybeObject | "{" ObjectBody CloseBrace
+    // MaybeObject          = "{" ObjectBody CloseBrace | Nil
+    // CloseBrace           = "}" // this rule exists so we can insert some special logic to handle extra / missing "}" in the top level ObjectBody
 
 
     public static CkObject parse(string inputString)
@@ -52,6 +50,8 @@ public class Parser
     }
 
     public TokeniserOutput tokens;
+    public bool allowBadBraces = true;
+
     private int tokenIndex = 0;
 
     Token peek()
@@ -110,8 +110,7 @@ public class Parser
             pop();
             pair.valueObject = new CkObject();
             parseObjectBody(pair.valueObject);
-            if (pop().type != Token.Type.CloseBrace)
-                throw new Exception("expected }");
+            parseCloseBrace();
         }
         else
         {
@@ -212,8 +211,7 @@ public class Parser
             pop();
             pair.valueObject = new CkObject();
             parseObjectBody(pair.valueObject);
-            if (pop().type != Token.Type.CloseBrace)
-                throw new Exception("expected }");
+            parseCloseBrace();
         }
         else
         {
@@ -234,14 +232,32 @@ public class Parser
 
             pair.valueObject = new CkObject();
             parseObjectBody(pair.valueObject);
-
-            if (pop().type != Token.Type.CloseBrace)
-                throw new Exception("expected }");
+            parseCloseBrace();
         }
         else // todo: assert
         {
             pair.whitespaceBeforeValue = startToken.ignoredTextBeforeToken;
             pair.valueString = startToken.stringValue;
+        }
+    }
+
+    private void parseCloseBrace()
+    {
+        if (allowBadBraces)
+        {
+            if (peek().type == Token.Type.FileEnd)
+                return;
+
+            if (peek().type == Token.Type.CloseBrace)
+            {
+                pop();
+                return;
+            }
+        }
+        else
+        {
+            if (pop().type != Token.Type.CloseBrace)
+                throw new Exception("expected }");
         }
     }
 }

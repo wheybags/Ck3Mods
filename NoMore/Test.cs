@@ -8,6 +8,7 @@
         testMixedArrayDict();
         testArrayInArray();
         testTypeTag();
+        testMissingCloseBrace();
     }
 
     private static void assert(bool val)
@@ -125,5 +126,28 @@
         assert(color.valuesList[2].valueString == "150");
 
         assert(data.serialise() == input);
+    }
+
+    private static void testMissingCloseBrace()
+    {
+        string input = "arr = { {a b} {c d";
+        CkObject data = Parser.parse(input);
+        assert(data.valuesList.Count == 1);
+
+        CkObject array = data.valuesList[0].valueObject;
+        assert(array.valuesList.Count == 2);
+
+        CkObject subArray1 = array.valuesList[0].valueObject;
+        assert(subArray1.valuesList.Count == 2);
+        assert(subArray1.valuesList[0].valueString == "a");
+        assert(subArray1.valuesList[1].valueString == "b");
+
+        CkObject subArray2 = array.valuesList[1].valueObject;
+        assert(subArray2.valuesList.Count == 2);
+        assert(subArray2.valuesList[0].valueString == "c");
+        assert(subArray2.valuesList[1].valueString == "d");
+
+        // we may have to parse broken files, but we shall *not* produce them
+        assert(data.serialise() == input + "}}");
     }
 }
