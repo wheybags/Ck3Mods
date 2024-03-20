@@ -9,6 +9,7 @@
         testArrayInArray();
         testTypeTag();
         testMissingCloseBrace();
+        testExtraCloseBrace();
     }
 
     private static void assert(bool val)
@@ -149,5 +150,25 @@
 
         // we may have to parse broken files, but we shall *not* produce them
         assert(data.serialise() == input + "}}");
+    }
+
+    private static void testExtraCloseBrace()
+    {
+        string input = "{a b}}} {c d}";
+        CkObject array = Parser.parse(input);
+        assert(array.valuesList.Count == 2);
+
+        CkObject subArray1 = array.valuesList[0].valueObject;
+        assert(subArray1.valuesList.Count == 2);
+        assert(subArray1.valuesList[0].valueString == "a");
+        assert(subArray1.valuesList[1].valueString == "b");
+
+        CkObject subArray2 = array.valuesList[1].valueObject;
+        assert(subArray2.valuesList.Count == 2);
+        assert(subArray2.valuesList[0].valueString == "c");
+        assert(subArray2.valuesList[1].valueString == "d");
+
+        // we may have to parse broken files, but we shall *not* produce them
+        assert(array.serialise() == "{a b} {c d}");
     }
 }

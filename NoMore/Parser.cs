@@ -53,6 +53,7 @@ public class Parser
     public bool allowBadBraces = true;
 
     private int tokenIndex = 0;
+    private int objectDepth = 0;
 
     Token peek()
     {
@@ -79,6 +80,8 @@ public class Parser
 
     private void parseObjectBody(CkObject obj)
     {
+        objectDepth++;
+
         if (peek().type == Token.Type.String || peek().type == Token.Type.OpenBrace)
         {
             parseItem(obj);
@@ -92,6 +95,8 @@ public class Parser
         {
             throw new Exception("unexpected");
         }
+
+        objectDepth--;
     }
 
     private void parseItem(CkObject obj)
@@ -245,12 +250,25 @@ public class Parser
     {
         if (allowBadBraces)
         {
+            // Paradox has shipped (working in-game) game files with broken close braces, so we have to support them
+
+            // This allows missing close brace(s) at the end of file, eg:
+            // "x = {{1 2} {3 4"
             if (peek().type == Token.Type.FileEnd)
                 return;
 
             if (peek().type == Token.Type.CloseBrace)
             {
                 pop();
+
+                // This allows extra close brace(s) after top level objects, eg:
+                // "x = { a b }} y = { c d }"
+                if (objectDepth == 1)
+                {
+                    while (peek().type == Token.Type.CloseBrace)
+                        pop();
+                }
+
                 return;
             }
         }
