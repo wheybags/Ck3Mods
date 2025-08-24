@@ -5,6 +5,8 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoMore", "NoMore\NoMore.csproj", "{0465C4B0-64AF-45F9-80B4-4877DD52B09D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ck3ModTools", "Ck3ModTools\Ck3ModTools.csproj", "{0850F849-01A2-40F7-982C-35991951957E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0465C4B0-64AF-45F9-80B4-4877DD52B09D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0465C4B0-64AF-45F9-80B4-4877DD52B09D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0465C4B0-64AF-45F9-80B4-4877DD52B09D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0850F849-01A2-40F7-982C-35991951957E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0850F849-01A2-40F7-982C-35991951957E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0850F849-01A2-40F7-982C-35991951957E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0850F849-01A2-40F7-982C-35991951957E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

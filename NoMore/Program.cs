@@ -54,7 +54,7 @@ public class Program
 
         while (true)
         {
-            Console.Write("Choose a playset (1-" + (playsets.Count + 1) + "): ");
+            Console.Write("Choose a playset (1-" + playsets.Count + "): ");
             string read = Console.ReadLine();
 
             if (int.TryParse(read, out int selectedIndex))
