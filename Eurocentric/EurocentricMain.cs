@@ -1,108 +1,16 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
-public class Program
+public static class EurocentricMain
 {
     public static void Main(String[] args)
     {
-        Tests.run();
-
-        if (!Debugger.IsAttached)
-        {
-            try
-            {
-                generateMod();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error: " + e);
-                Console.WriteLine("");
-                Console.WriteLine("Mod generation failed!");
-            }
-        }
-        else
-        {
-            generateMod();
-        }
-
-        Console.Write("Press enter to close");
-        Console.ReadLine();
+        Misc.generateMod("Eurocentric", generateModEurocentric);
     }
 
-    public class FileResolver
+    public static void generateModEurocentric(FileResolver fileResolver, string outputModFolder)
     {
-        public readonly List<string> sourcePaths = new List<string>();
-
-        public FileResolver(string gameInstallPath, List<Mod> mods)
-        {
-            sourcePaths.Add(gameInstallPath + "\\game");
-            foreach (Mod mod in mods)
-                sourcePaths.Add(mod.path);
-        }
-
-        public HashSet<string> getFilesInFolder(string relativeFolderPath)
-        {
-            HashSet<string> files = new HashSet<string>();
-            foreach (string root in sourcePaths)
-            {
-                string fullPath = root + "\\" + relativeFolderPath;
-                if (Directory.Exists(fullPath))
-                {
-                    foreach (string file in Directory.GetFiles(fullPath))
-                    {
-                        string relativePath = file.Substring(root.Length + 1);
-                        files.Add(relativePath);
-                    }
-                }
-            }
-
-            return files;
-        }
-
-        public string resolve(string relativePath)
-        {
-            string lastPath = null;
-            foreach (string root in sourcePaths)
-            {
-                string fullPath = root + "\\" + relativePath;
-                if (File.Exists(fullPath))
-                    lastPath = root;
-            }
-
-            return lastPath;
-        }
-
-        public string readFileText(string relativePath)
-        {
-            string root = resolve(relativePath);
-            if (root == null)
-                throw new Exception("Couldn't find file " + relativePath + " in any source path!");
-
-            return File.ReadAllText(root + "\\" + relativePath, Encoding.UTF8);
-        }
-    }
-
-    private static void generateMod()
-    {
-        string gameInstallPath = Misc.getGameInstallFolder();
-        if (gameInstallPath == null)
-            throw new Exception("Couldn't find CK3 install path!");
-
-        Console.WriteLine("Found CK3 install at: " + gameInstallPath);
-        Console.WriteLine("");
-
-        Playset selectedPlayset = Misc.selectPlaysetInteractive(gameInstallPath);
-
-
-        string modName = "Eurocentric - " + selectedPlayset.name;
-        string modFolderName = "eurocentric_" + selectedPlayset.name;
-        string outputModFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Paradox Interactive\\Crusader Kings III\\mod\\" + modFolderName;
-
         string titlesFileRelativePath = "localization\\english\\culture\\culture_titles_l_english.yml";
-
-        List<Mod> baseMods = selectedPlayset.mods.Where(mod => mod.path != outputModFolder).ToList();
-        FileResolver fileResolver = new FileResolver(gameInstallPath, baseMods);
 
         LocalisationFileData titlesFileData = LocalisationParser.parse(fileResolver.readFileText(titlesFileRelativePath));
 
@@ -224,28 +132,5 @@ public class Program
         string outputPath = outputModFolder + "\\" + titlesFileRelativePath;
         Directory.CreateDirectory(Directory.GetParent(outputPath).FullName);
         File.WriteAllText(outputPath, serialised, Encoding.UTF8);
-
-        string dotModData = "version=\"1.0\"\n" +
-                            "tags={\n" +
-                            "    \"Gui\"\n" +
-                            "    \"Fixes\"\n" +
-                            "}\n" +
-                            "name=\"" + modName + "\"";
-
-        File.WriteAllText(outputModFolder + "\\descriptor.mod", dotModData);
-        File.WriteAllText(Directory.GetParent(outputModFolder).FullName + "\\" + modFolderName + ".mod", dotModData + "\npath=\"" + outputModFolder.Replace("\\", "/") + "\"");
-
-        Console.WriteLine("Generating mod done!");
-        Console.WriteLine("");
-        Console.WriteLine("**************");
-        Console.WriteLine("* READ THIS! *");
-        Console.WriteLine("**************");
-        Console.WriteLine("");
-        Console.WriteLine("In the game launcher, edit the \"" + selectedPlayset.name + "\" playset, and enable the mod \"" + modName + "\"");
-        Console.WriteLine("Make sure it is always last in the load order!");
-        Console.WriteLine("");
-        Console.WriteLine("ALSO NOTE: You need to re-run this tool every time you change your game data!");
-        Console.WriteLine("This means whenever you add / remove a mod, or update the base game or a mod");
-        Console.WriteLine("");
     }
 }

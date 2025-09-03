@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using System.Diagnostics;
+using Microsoft.Data.Sqlite;
 using Microsoft.Win32;
 
 public class Mod
@@ -113,46 +114,114 @@ public static class Misc
         return playsets;
     }
 
-    public static Playset selectPlaysetInteractive(string gameInstallPath)
+
+    public delegate void GenerateModDelegate(FileResolver fileResolver, string outputModFolder);
+
+    public static void generateMod(string modBaseName, GenerateModDelegate generateModDelegate)
     {
-        List<Playset> playsets = fetchPlaysets(gameInstallPath);
-
-        Console.WriteLine("Playsets:");
-        for (int i = 0; i < playsets.Count; i++)
+        void doGeneration()
         {
-            Playset playset = playsets[i];
-            Console.WriteLine("  " + (i + 1) + ": " + playset.name);
-            foreach (Mod mod in playset.mods)
-                Console.WriteLine("    - " + mod.name);
-        }
-        Console.WriteLine("");
+            string gameInstallPath = getGameInstallFolder();
+            if (gameInstallPath == null)
+                throw new Exception("Couldn't find CK3 install path!");
 
-        Playset selectedPlayset = null;
+            Console.WriteLine("Found CK3 install at: " + gameInstallPath);
+            Console.WriteLine("");
 
-        if (playsets.Count == 1)
-        {
-            selectedPlayset = playsets[0];
-        }
-        else
-        {
-            while (true)
+            List<Playset> playsets = fetchPlaysets(gameInstallPath);
+
+            Console.WriteLine("Playsets:");
+            for (int i = 0; i < playsets.Count; i++)
             {
-                Console.Write("Choose a playset (1-" + playsets.Count + "): ");
-                string read = Console.ReadLine();
+                Playset playset = playsets[i];
+                Console.WriteLine("  " + (i + 1) + ": " + playset.name);
+                foreach (Mod mod in playset.mods)
+                    Console.WriteLine("    - " + mod.name);
+            }
+            Console.WriteLine("");
 
-                if (int.TryParse(read, out int selectedIndex))
+            Playset selectedPlayset = null;
+
+            if (playsets.Count == 1)
+            {
+                selectedPlayset = playsets[0];
+            }
+            else
+            {
+                while (true)
                 {
-                    if (selectedIndex >= 1 && selectedIndex <= playsets.Count)
+                    Console.Write("Choose a playset (1-" + playsets.Count + "): ");
+                    string read = Console.ReadLine();
+
+                    if (int.TryParse(read, out int selectedIndex))
                     {
-                        selectedPlayset = playsets[selectedIndex - 1];
-                        break;
+                        if (selectedIndex >= 1 && selectedIndex <= playsets.Count)
+                        {
+                            selectedPlayset = playsets[selectedIndex - 1];
+                            break;
+                        }
                     }
                 }
             }
+
+            Console.WriteLine("Using playset " + selectedPlayset.name);
+
+            string modName = modBaseName + " - " + selectedPlayset.name;
+            string modFolderName = modBaseName + "_" + selectedPlayset.name;
+            string outputModFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Paradox Interactive\\Crusader Kings III\\mod\\" + modFolderName;
+
+            try { Directory.Delete(outputModFolder, true);  } catch (Exception) {}
+            Directory.CreateDirectory(outputModFolder);
+
+            List<Mod> baseMods = selectedPlayset.mods.Where(mod => mod.path != outputModFolder).ToList();
+            FileResolver fileResolver = new FileResolver(gameInstallPath, baseMods);
+
+            generateModDelegate(fileResolver, outputModFolder);
+
+            string dotModData = "version=\"1.0\"\n" +
+                                "tags={\n" +
+                                "    \"Fixes\"\n" +
+                                "}\n" +
+                                "name=\"" + modName + "\"";
+
+            File.WriteAllText(outputModFolder + "\\descriptor.mod", dotModData);
+            File.WriteAllText(Directory.GetParent(outputModFolder).FullName + "\\" + modFolderName + ".mod", dotModData + "\npath=\"" + outputModFolder.Replace("\\", "/") + "\"");
+
+            Console.WriteLine("Generating mod done!");
+            Console.WriteLine("");
+            Console.WriteLine("**************");
+            Console.WriteLine("* READ THIS! *");
+            Console.WriteLine("**************");
+            Console.WriteLine("");
+            Console.WriteLine("In the game launcher, edit the \"" + selectedPlayset.name + "\" playset, and enable the mod \"" + modName + "\"");
+            Console.WriteLine("Make sure it is always last in the load order!");
+            Console.WriteLine("");
+            Console.WriteLine("ALSO NOTE: You need to re-run this tool every time you change your game data!");
+            Console.WriteLine("This means whenever you add / remove a mod, or update the base game or a mod");
+            Console.WriteLine("");
         }
 
-        Console.WriteLine("Using playset " + selectedPlayset.name);
+        Tests.run();
 
-        return selectedPlayset;
+        if (!Debugger.IsAttached)
+        {
+            try
+            {
+                doGeneration();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error: " + e);
+                Console.WriteLine("");
+                Console.WriteLine("Mod generation failed!");
+            }
+        }
+        else
+        {
+            doGeneration();
+        }
+
+        Console.Write("Press enter to close");
+        Console.ReadLine();
     }
 }
