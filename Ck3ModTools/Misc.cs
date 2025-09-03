@@ -246,7 +246,10 @@ public static class Misc
             doGeneration();
         }
 
-        Console.Write("Press enter to close");
-        Console.ReadLine();
+        if (OperatingSystem.IsWindows())
+        {
+            Console.Write("Press enter to close");
+            Console.ReadLine();
+        }
     }
 }
