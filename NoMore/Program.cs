@@ -5,7 +5,7 @@ public class Program
 {
     public static void Main(String[] args)
     {
-        Test.run();
+        Tests.run();
 
         if (!Debugger.IsAttached)
         {
@@ -31,14 +31,14 @@ public class Program
 
     private static void generateMod()
     {
-        string gameInstallPath = GamePaths.getGameInstallFolder();
+        string gameInstallPath = Misc.getGameInstallFolder();
         if (gameInstallPath == null)
             throw new Exception("Couldn't find CK3 install path!");
 
         Console.WriteLine("Found CK3 install at: " + gameInstallPath);
         Console.WriteLine("");
 
-        List<Playset> playsets = GamePaths.fetchPlaysets(gameInstallPath);
+        List<Playset> playsets = Misc.fetchPlaysets(gameInstallPath);
 
         Console.WriteLine("Playsets:");
         for (int i = 0; i < playsets.Count; i++)

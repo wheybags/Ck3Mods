@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoMore", "NoMore\NoMore.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ck3ModTools", "Ck3ModTools\Ck3ModTools.csproj", "{0850F849-01A2-40F7-982C-35991951957E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eurocentric", "Eurocentric\Eurocentric.csproj", "{C0D47469-3D44-4E95-8ECA-79D7E5B89B96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{0850F849-01A2-40F7-982C-35991951957E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0850F849-01A2-40F7-982C-35991951957E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0850F849-01A2-40F7-982C-35991951957E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0D47469-3D44-4E95-8ECA-79D7E5B89B96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0D47469-3D44-4E95-8ECA-79D7E5B89B96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0D47469-3D44-4E95-8ECA-79D7E5B89B96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0D47469-3D44-4E95-8ECA-79D7E5B89B96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

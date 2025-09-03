@@ -14,7 +14,7 @@ public class Playset
     public List<Mod> mods = new List<Mod>();
 }
 
-public static class GamePaths
+public static class Misc
 {
     public static string getGameInstallFolder()
     {
@@ -111,5 +111,48 @@ public static class GamePaths
         }
 
         return playsets;
+    }
+
+    public static Playset selectPlaysetInteractive(string gameInstallPath)
+    {
+        List<Playset> playsets = fetchPlaysets(gameInstallPath);
+
+        Console.WriteLine("Playsets:");
+        for (int i = 0; i < playsets.Count; i++)
+        {
+            Playset playset = playsets[i];
+            Console.WriteLine("  " + (i + 1) + ": " + playset.name);
+            foreach (Mod mod in playset.mods)
+                Console.WriteLine("    - " + mod.name);
+        }
+        Console.WriteLine("");
+
+        Playset selectedPlayset = null;
+
+        if (playsets.Count == 1)
+        {
+            selectedPlayset = playsets[0];
+        }
+        else
+        {
+            while (true)
+            {
+                Console.Write("Choose a playset (1-" + playsets.Count + "): ");
+                string read = Console.ReadLine();
+
+                if (int.TryParse(read, out int selectedIndex))
+                {
+                    if (selectedIndex >= 1 && selectedIndex <= playsets.Count)
+                    {
+                        selectedPlayset = playsets[selectedIndex - 1];
+                        break;
+                    }
+                }
+            }
+        }
+
+        Console.WriteLine("Using playset " + selectedPlayset.name);
+
+        return selectedPlayset;
     }
 }

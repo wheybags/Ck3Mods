@@ -1,4 +1,13 @@
-﻿public static class Test
+﻿public static class Tests
+{
+    public static void run()
+    {
+        TestDataParser.run();
+        TestLocalisationParser.run();
+    }
+}
+
+public static class TestDataParser
 {
     public static void run()
     {
@@ -171,4 +180,78 @@
         // we may have to parse broken files, but we shall *not* produce them
         assert(array.serialise() == "{a b} {c d}");
     }
+}
+
+public static class TestLocalisationParser
+{
+   public static void run()
+   {
+      testBasic();
+      testEOFReserialise();
+      testEmbeddedQuotes();
+      testCreateKey();
+      testCreateFromScratch();
+   }
+
+   private static void assert(bool val)
+   {
+      if (!val)
+         throw new Exception("test failed");
+   }
+
+   private static void testBasic()
+   {
+      string input = "l_english:\n\n #############################################\n#General names:\n baron:0 \"Baron\"";
+      LocalisationFileData data = LocalisationParser.parse(input);
+      assert(data.sections.Count == 1);
+      assert(data.sections[0].key == "l_english");
+      assert(data.sections[0].entries.Count == 1);
+      assert(data.sections[0].entries[0].key == "baron");
+      assert(data.sections[0].entries[0].number == 0);
+      assert(data.sections[0].entries[0].value == "Baron");
+
+      string serialised = LocalisationSerialiser.serialise(data);
+      assert(serialised == input);
+   }
+
+   private static void testEOFReserialise()
+   {
+      string input = "abc:\n count_herder_female: \"Shepherdess\"\n";
+      LocalisationFileData data = LocalisationParser.parse(input);
+      assert(data.sections.Count == 1);
+      assert(data.sections[0].entries.Count == 1);
+      string serialised = LocalisationSerialiser.serialise(data);
+      assert(serialised == input);
+   }
+
+   private static void testEmbeddedQuotes()
+   {
+      string input = "abc:\n key: \"value with \"quotes\" in it\"";
+      LocalisationFileData data = LocalisationParser.parse(input);
+      assert(data.sections.Count == 1);
+      assert(data.sections[0].entries.Count == 1);
+      assert(data.sections[0].entries[0].key == "key");
+      assert(data.sections[0].entries[0].value == "value with \"quotes\" in it");
+   }
+
+   private static void testCreateKey()
+   {
+      string input = "abc:\n a: \"A\"";
+      LocalisationFileData data = LocalisationParser.parse(input);
+      data.sections[0].set("b", "B");
+      string serialised = LocalisationSerialiser.serialise(data);
+      assert(serialised == "abc:\n a: \"A\"\n b: \"B\"");
+   }
+
+   private static void testCreateFromScratch()
+   {
+      LocalisationFileData data = new LocalisationFileData();
+      LocalisationSection section = new LocalisationSection();
+      section.key = "abc";
+      data.sections.Add(section);
+      section.set("a", "A");
+      section.set("b", "B");
+      string serialised = LocalisationSerialiser.serialise(data);
+      assert(serialised == "abc:\n a: \"A\"\n b: \"B\"");
+   }
 }
