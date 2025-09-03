@@ -19,9 +19,20 @@ public static class Misc
 {
     public static string getGameInstallFolder()
     {
-        string steamPath = Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Valve\\Steam", "SteamPath", null) as string;
-        string vdfPath = steamPath.Replace("/", "\\") + "\\steamapps\\libraryfolders.vdf";
+        string vdfPath;
+        if (OperatingSystem.IsWindows())
+        {
+            string steamPath = Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Valve\\Steam", "SteamPath", null) as string;
+            vdfPath = steamPath.Replace("/", "\\") + "\\steamapps\\libraryfolders.vdf";
+        }
+        else
+        {
+            if (!OperatingSystem.IsMacOS())
+                throw new Exception("Only Windows and MacOS are supported");
 
+            vdfPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) +
+                      "/Library/Application Support/Steam/steamapps/libraryfolders.vdf";
+        }
 
         foreach (string line in File.ReadAllLines(vdfPath))
         {
@@ -30,8 +41,8 @@ public static class Misc
             {
                 // line is something like:
                 // "path"		"C:\\Program Files (x86)\\Steam"
-                string libraryPath = trimmedLine.Substring("\"path\"".Length).Trim();
-                libraryPath = libraryPath.Substring(1, libraryPath.Length - 2) + "\\steamapps\\common\\Crusader Kings III";
+                string libraryPath = trimmedLine.Substring("\"path\"".Length).Trim().Replace('\\', '/');
+                libraryPath = libraryPath.Substring(1, libraryPath.Length - 2) + "/steamapps/common/Crusader Kings III";
 
                 if (Directory.Exists(libraryPath))
                     return libraryPath;
@@ -41,9 +52,17 @@ public static class Misc
         return null;
     }
 
+    public static string getPlayerDataFolder()
+    {
+        if (OperatingSystem.IsWindows())
+            return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments).Replace('\\', '/') + "/Paradox Interactive/Crusader Kings III";
+        else
+            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/Documents/Paradox Interactive/Crusader Kings III";
+    }
+
     public static List<Playset> fetchPlaysets(string gameInstallPath)
     {
-        string sqlitePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Paradox Interactive\\Crusader Kings III\\launcher-v2.sqlite";
+        string sqlitePath = getPlayerDataFolder() + "/launcher-v2.sqlite";
         using SqliteConnection connection = new SqliteConnection("Data Source=" + sqlitePath + ";Mode=ReadOnly");
         connection.Open();
 
@@ -93,13 +112,13 @@ public static class Misc
                 if (steamId != null)
                 {
                     string steamappsFolder = new DirectoryInfo(gameInstallPath).Parent.Parent.FullName;
-                    mod.path = steamappsFolder + "\\workshop\\content\\1158310\\" + steamId;
+                    mod.path = steamappsFolder + "/workshop/content/1158310/" + steamId;
                 }
                 else
                 {
                     // gameRegistryId is something like "mod/ugc_2887120253.mod"
-                    string relativePath = gameRegistryId.Replace("/", "\\").Substring(0, gameRegistryId.Length - 4);
-                    mod.path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Paradox Interactive\\Crusader Kings III\\" + relativePath;
+                    string relativePath = gameRegistryId.Substring(0, gameRegistryId.Length - 4);
+                    mod.path = getPlayerDataFolder() + "/" + relativePath;
                 }
 
                 mod.name = displayName;
@@ -129,6 +148,12 @@ public static class Misc
             Console.WriteLine("");
 
             List<Playset> playsets = fetchPlaysets(gameInstallPath);
+
+            if (playsets.Count == 0)
+            {
+                Console.WriteLine("Error: no playsets found, launch the game at least once and it should make a playset.");
+                return;
+            }
 
             Console.WriteLine("Playsets:");
             for (int i = 0; i < playsets.Count; i++)
@@ -168,7 +193,7 @@ public static class Misc
 
             string modName = modBaseName + " - " + selectedPlayset.name;
             string modFolderName = modBaseName + "_" + selectedPlayset.name;
-            string outputModFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Paradox Interactive\\Crusader Kings III\\mod\\" + modFolderName;
+            string outputModFolder = getPlayerDataFolder() + "/mod/" + modFolderName;
 
             try { Directory.Delete(outputModFolder, true);  } catch (Exception) {}
             Directory.CreateDirectory(outputModFolder);
@@ -184,8 +209,8 @@ public static class Misc
                                 "}\n" +
                                 "name=\"" + modName + "\"";
 
-            File.WriteAllText(outputModFolder + "\\descriptor.mod", dotModData);
-            File.WriteAllText(Directory.GetParent(outputModFolder).FullName + "\\" + modFolderName + ".mod", dotModData + "\npath=\"" + outputModFolder.Replace("\\", "/") + "\"");
+            File.WriteAllText(outputModFolder + "/descriptor.mod", dotModData);
+            File.WriteAllText(Directory.GetParent(outputModFolder).FullName + "/" + modFolderName + ".mod", dotModData + "\npath=\"" + outputModFolder.Replace("\\", "/") + "\"");
 
             Console.WriteLine("Generating mod done!");
             Console.WriteLine("");

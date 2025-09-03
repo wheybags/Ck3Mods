@@ -9,7 +9,7 @@ public static class Program
 
     private static void generateModNoMore(FileResolver fileResolver, string outputModFolder)
     {
-        HashSet<string> dataFileRelativePaths = fileResolver.getFilesInFolder("common\\character_interactions");
+        HashSet<string> dataFileRelativePaths = fileResolver.getFilesInFolder("common/character_interactions");
 
         foreach (string relativePath in dataFileRelativePaths)
         {
@@ -39,7 +39,7 @@ public static class Program
 
 
             string serialised = data.serialise();
-            string outputPath = outputModFolder + "\\" + relativePath;
+            string outputPath = outputModFolder + "/" + relativePath;
             Directory.CreateDirectory(Directory.GetParent(outputPath).FullName);
             File.WriteAllText(outputPath, serialised, Encoding.UTF8);
         }

@@ -6,7 +6,7 @@ public class FileResolver
 
     public FileResolver(string gameInstallPath, List<Mod> mods)
     {
-        sourcePaths.Add(gameInstallPath + "\\game");
+        sourcePaths.Add(gameInstallPath + "/game");
         foreach (Mod mod in mods)
             sourcePaths.Add(mod.path);
     }
@@ -16,12 +16,12 @@ public class FileResolver
         HashSet<string> files = new HashSet<string>();
         foreach (string root in sourcePaths)
         {
-            string fullPath = root + "\\" + relativeFolderPath;
+            string fullPath = root + "/" + relativeFolderPath;
             if (Directory.Exists(fullPath))
             {
                 foreach (string file in Directory.GetFiles(fullPath))
                 {
-                    string relativePath = file.Substring(root.Length + 1);
+                    string relativePath = file.Substring(root.Length + 1).Replace('\\', '/');
                     files.Add(relativePath);
                 }
             }
@@ -35,7 +35,7 @@ public class FileResolver
         string lastPath = null;
         foreach (string root in sourcePaths)
         {
-            string fullPath = root + "\\" + relativePath;
+            string fullPath = root + "/" + relativePath;
             if (File.Exists(fullPath))
                 lastPath = root;
         }
@@ -49,6 +49,6 @@ public class FileResolver
         if (root == null)
             throw new Exception("Couldn't find file " + relativePath + " in any source path!");
 
-        return File.ReadAllText(root + "\\" + relativePath, Encoding.UTF8);
+        return File.ReadAllText(root + "/" + relativePath, Encoding.UTF8);
     }
 }

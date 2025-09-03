@@ -10,7 +10,7 @@ public static class EurocentricMain
 
     public static void generateModEurocentric(FileResolver fileResolver, string outputModFolder)
     {
-        string titlesFileRelativePath = "localization\\english\\culture\\culture_titles_l_english.yml";
+        string titlesFileRelativePath = "localization/english/culture/culture_titles_l_english.yml";
 
         LocalisationFileData titlesFileData = LocalisationParser.parse(fileResolver.readFileText(titlesFileRelativePath));
 
@@ -129,7 +129,7 @@ public static class EurocentricMain
         }
 
         string serialised = LocalisationSerialiser.serialise(titlesFileData);
-        string outputPath = outputModFolder + "\\" + titlesFileRelativePath;
+        string outputPath = outputModFolder + "/" + titlesFileRelativePath;
         Directory.CreateDirectory(Directory.GetParent(outputPath).FullName);
         File.WriteAllText(outputPath, serialised, Encoding.UTF8);
     }
