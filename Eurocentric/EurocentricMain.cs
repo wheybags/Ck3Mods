@@ -53,22 +53,6 @@ public static class EurocentricMain
             {"emperor_theocracy_male", titlesFileData.sections[0].get("emperor_theocracy_male_christianity_religion").value},
             {"emperor_female_theocracy", titlesFileData.sections[0].get("emperor_theocracy_female_christianity_religion").value},
             {"empire_theocracy", titlesFileData.sections[0].get("empire_theocracy_christianity_religion").value},
-
-            {"baron_republic_male", titlesFileData.sections[0].get("baron_republic_male").value},
-            {"baron_female_republic", titlesFileData.sections[0].get("baron_republic_female").value},
-            {"barony_republic", titlesFileData.sections[0].get("barony_republic").value},
-            {"count_republic_male", titlesFileData.sections[0].get("count_republic_male").value},
-            {"count_female_republic", titlesFileData.sections[0].get("count_republic_female").value},
-            {"county_republic", titlesFileData.sections[0].get("county_republic").value},
-            {"duke_republic_male", titlesFileData.sections[0].get("duke_republic_male").value},
-            {"duke_female_republic", titlesFileData.sections[0].get("duke_republic_female").value},
-            {"duchy_republic", titlesFileData.sections[0].get("duchy_republic").value},
-            {"king_republic_male", titlesFileData.sections[0].get("king_republic_male").value},
-            {"king_female_republic", titlesFileData.sections[0].get("king_republic_female").value},
-            {"kingdom_republic", titlesFileData.sections[0].get("kingdom_republic").value},
-            {"emperor_republic_male", titlesFileData.sections[0].get("emperor_republic_male").value},
-            {"emperor_female_republic", titlesFileData.sections[0].get("emperor_republic_female").value},
-            {"empire_republic", titlesFileData.sections[0].get("empire_republic").value},
         };
 
         // First resolve any $lookups$ (eg $duke_feudal_male_arabic_group$ -> Emir) before adding bracketed titles,
