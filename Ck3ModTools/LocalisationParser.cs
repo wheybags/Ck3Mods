@@ -46,6 +46,11 @@ public class LocalisationEntry
     public string value;
 
     public string whitespaceBeforeKey = null;
+
+    public override string ToString()
+    {
+        return "{" + key + " = " + value + "}";
+    }
 }
 
 // This one is an ad-hoc parser that doesn't use a proper grammar. Hopefully should be good enough
@@ -271,15 +276,17 @@ public static class LocalisationParser
             throw new Exception("expected opening quote for value");
         index++;
 
-        string accumulator = "";
+        int startIndex = index;
+        int lastQuoteIndex = -1;
+
         while (true)
         {
-            if (index >= input.Length)
+            if (index >= input.Length || input[index] == '\n')
             {
-                if (accumulator.Length > 0 && accumulator[accumulator.Length - 1] == '"')
+                if (lastQuoteIndex != -1)
                 {
-                    accumulator = accumulator.Substring(0, accumulator.Length - 1);
-                    return accumulator;
+                    index = lastQuoteIndex + 1;
+                    return input.Substring(startIndex, lastQuoteIndex - startIndex);
                 }
                 else
                 {
@@ -287,15 +294,11 @@ public static class LocalisationParser
                 }
             }
 
-            if (input[index] == '"' &&
-                index + 1 < input.Length &&
-                (input[index + 1] == '\r' || input[index + 1] == '\n'))
+            if (input[index] == '"')
             {
-                index++;
-                return accumulator;
+                lastQuoteIndex = index;
             }
 
-            accumulator += input[index];
             index++;
         }
     }

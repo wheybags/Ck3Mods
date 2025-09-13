@@ -191,6 +191,8 @@ public static class TestLocalisationParser
       testEmbeddedQuotes();
       testCreateKey();
       testCreateFromScratch();
+      testTrailingSpace();
+      testCommentAfterEntry();
    }
 
    private static void assert(bool val)
@@ -253,5 +255,47 @@ public static class TestLocalisationParser
       section.set("b", "B");
       string serialised = LocalisationSerialiser.serialise(data);
       assert(serialised == "abc:\n a: \"A\"\n b: \"B\"");
+   }
+
+   private static void testTrailingSpace()
+   {
+       string input = "l_english:\n barony_feudal_rimmen: \"Seat\" \n baron_feudal_male_rimmen: \"Master\"";
+
+       LocalisationFileData data = LocalisationParser.parse(input);
+       assert(data.sections.Count == 1);
+       assert(data.sections[0].key == "l_english");
+       assert(data.sections[0].entries.Count == 2);
+
+       assert(data.sections[0].entries[0].key == "barony_feudal_rimmen");
+       assert(data.sections[0].entries[0].number == null);
+       assert(data.sections[0].entries[0].value == "Seat");
+
+       assert(data.sections[0].entries[1].key == "baron_feudal_male_rimmen");
+       assert(data.sections[0].entries[1].number == null);
+       assert(data.sections[0].entries[1].value == "Master");
+
+       string serialised = LocalisationSerialiser.serialise(data);
+       assert(serialised == input);
+   }
+
+   private static void testCommentAfterEntry()
+   {
+       string input = "l_english:\n empire_mercenary: \"Grand Army\" #of the Republic\n a: \"b\"";
+
+       LocalisationFileData data = LocalisationParser.parse(input);
+       assert(data.sections.Count == 1);
+       assert(data.sections[0].key == "l_english");
+       assert(data.sections[0].entries.Count == 2);
+
+       assert(data.sections[0].entries[0].key == "empire_mercenary");
+       assert(data.sections[0].entries[0].number == null);
+       assert(data.sections[0].entries[0].value == "Grand Army");
+
+       assert(data.sections[0].entries[1].key == "a");
+       assert(data.sections[0].entries[1].number == null);
+       assert(data.sections[0].entries[1].value == "b");
+
+       string serialised = LocalisationSerialiser.serialise(data);
+       assert(serialised == input);
    }
 }
