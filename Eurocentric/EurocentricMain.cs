@@ -19,7 +19,7 @@ public static class EurocentricMain
     {
         string titlesFileRelativePath = "localization/english/culture/culture_titles_l_english.yml";
         LocalisationFileData titlesFileData = LocalisationParser.parse(fileResolver.readFileText(titlesFileRelativePath));
-        if (titlesFileData.sections.Count != 1 || titlesFileData.sections[0].key != "l_english")
+        if (titlesFileData.topLevelKey != "l_english")
             throw new Exception("Unexpected titles file format!");
 
         Dictionary<string, FlavorizationRule> flavorizationRules = new Dictionary<string, FlavorizationRule>();
@@ -75,7 +75,7 @@ public static class EurocentricMain
                     }
                 }
 
-                if (titlesFileData.sections[0].get(item.key) == null)
+                if (titlesFileData.get(item.key) == null)
                 {
                     Console.WriteLine("Skipping " + item.key + " as it has no localisation");
                     continue;
@@ -113,27 +113,27 @@ public static class EurocentricMain
 
         Dictionary<string, string> baseValues = new Dictionary<string, string>()
         {
-            { "baron", titlesFileData.sections[0].get("baron").value },
-            { "baron_female", titlesFileData.sections[0].get("baron_female").value },
-            { "count", titlesFileData.sections[0].get("count").value },
-            { "count_female", titlesFileData.sections[0].get("count_female").value },
-            { "duke", titlesFileData.sections[0].get("duke").value },
-            { "duke_female", titlesFileData.sections[0].get("duke_female").value },
-            { "king", titlesFileData.sections[0].get("king").value },
-            { "king_female", titlesFileData.sections[0].get("king_female").value },
-            { "emperor", titlesFileData.sections[0].get("emperor").value },
-            { "emperor_female", titlesFileData.sections[0].get("emperor_female").value },
+            { "baron", titlesFileData.get("baron").value },
+            { "baron_female", titlesFileData.get("baron_female").value },
+            { "count", titlesFileData.get("count").value },
+            { "count_female", titlesFileData.get("count_female").value },
+            { "duke", titlesFileData.get("duke").value },
+            { "duke_female", titlesFileData.get("duke_female").value },
+            { "king", titlesFileData.get("king").value },
+            { "king_female", titlesFileData.get("king_female").value },
+            { "emperor", titlesFileData.get("emperor").value },
+            { "emperor_female", titlesFileData.get("emperor_female").value },
 
-            { "barony", titlesFileData.sections[0].get("barony_feudal").value },
-            { "county", titlesFileData.sections[0].get("county_feudal").value },
-            { "duchy", titlesFileData.sections[0].get("duchy_feudal").value },
-            { "kingdom", titlesFileData.sections[0].get("kingdom_feudal").value },
-            { "empire", titlesFileData.sections[0].get("empire_feudal").value },
+            { "barony", titlesFileData.get("barony_feudal").value },
+            { "county", titlesFileData.get("county_feudal").value },
+            { "duchy", titlesFileData.get("duchy_feudal").value },
+            { "kingdom", titlesFileData.get("kingdom_feudal").value },
+            { "empire", titlesFileData.get("empire_feudal").value },
         };
 
         foreach (FlavorizationRule rule in flavorizationRules.Values)
         {
-            LocalisationEntry originalEntry = titlesFileData.sections[0].get(rule.key.Substring(flavorizationRulePrefix.Length));
+            LocalisationEntry originalEntry = titlesFileData.get(rule.key.Substring(flavorizationRulePrefix.Length));
             if (originalEntry == null)
             {
                 Console.WriteLine("No entry for " + rule.key);
@@ -170,7 +170,7 @@ public static class EurocentricMain
                 value = newValue,
             };
 
-            titlesFileData.sections[0].entries.Add(newEntry);
+            titlesFileData.entries.Add(newEntry);
         }
 
         string titlesSerialised = LocalisationSerialiser.serialise(titlesFileData);

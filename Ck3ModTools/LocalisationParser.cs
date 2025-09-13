@@ -1,16 +1,11 @@
 ﻿public class LocalisationFileData
 {
-    public List<LocalisationSection> sections = new List<LocalisationSection>();
+    public string topLevelKey = null;
 
-    public string whitespaceAfterLastEntry = null;
-}
-
-public class LocalisationSection
-{
-    public string key;
     public List<LocalisationEntry> entries = new List<LocalisationEntry>();
 
-    public string whitespaceBeforeKey = null;
+    public string whitespaceBeforeTopLevelKey = null;
+    public string whitespaceAfterLastEntry = null;
 
     public LocalisationEntry get(string key)
     {
@@ -38,7 +33,6 @@ public class LocalisationSection
     }
 }
 
-
 public class LocalisationEntry
 {
     public string key;
@@ -60,8 +54,6 @@ public static class LocalisationParser
     {
         LocalisationFileData output = new LocalisationFileData();
 
-        LocalisationSection currentSection = null;
-
         int index = 0;
 
         while (index < input.Length)
@@ -79,14 +71,15 @@ public static class LocalisationParser
                 if (keyParse.number != null)
                     throw new Exception("number not allowed on top-level key");
 
-                currentSection = new LocalisationSection();
-                currentSection.key = keyParse.key;
-                currentSection.whitespaceBeforeKey = keyParse.junkBeforeKey;
-                output.sections.Add(currentSection);
+                if (output.topLevelKey != null)
+                    throw new Exception("multiple top-level keys");
+
+                output.topLevelKey = keyParse.key;
+                output.whitespaceBeforeTopLevelKey = keyParse.junkBeforeKey;
             }
             else
             {
-                if (currentSection == null)
+                if (output.topLevelKey == null)
                     throw new Exception("entry before section start");
 
                 if (keyParse.indentLevel != 1)
@@ -97,7 +90,7 @@ public static class LocalisationParser
                 entry.number = keyParse.number;
                 entry.whitespaceBeforeKey = keyParse.junkBeforeKey;
                 entry.value = parseValue(input, ref index);
-                currentSection.entries.Add(entry);
+                output.entries.Add(entry);
             }
         }
 

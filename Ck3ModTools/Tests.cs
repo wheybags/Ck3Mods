@@ -205,12 +205,11 @@ public static class TestLocalisationParser
    {
       string input = "l_english:\n\n #############################################\n#General names:\n baron:0 \"Baron\"";
       LocalisationFileData data = LocalisationParser.parse(input);
-      assert(data.sections.Count == 1);
-      assert(data.sections[0].key == "l_english");
-      assert(data.sections[0].entries.Count == 1);
-      assert(data.sections[0].entries[0].key == "baron");
-      assert(data.sections[0].entries[0].number == 0);
-      assert(data.sections[0].entries[0].value == "Baron");
+      assert(data.topLevelKey == "l_english");
+      assert(data.entries.Count == 1);
+      assert(data.entries[0].key == "baron");
+      assert(data.entries[0].number == 0);
+      assert(data.entries[0].value == "Baron");
 
       string serialised = LocalisationSerialiser.serialise(data);
       assert(serialised == input);
@@ -220,8 +219,7 @@ public static class TestLocalisationParser
    {
       string input = "abc:\n count_herder_female: \"Shepherdess\"\n";
       LocalisationFileData data = LocalisationParser.parse(input);
-      assert(data.sections.Count == 1);
-      assert(data.sections[0].entries.Count == 1);
+      assert(data.entries.Count == 1);
       string serialised = LocalisationSerialiser.serialise(data);
       assert(serialised == input);
    }
@@ -230,17 +228,16 @@ public static class TestLocalisationParser
    {
       string input = "abc:\n key: \"value with \"quotes\" in it\"";
       LocalisationFileData data = LocalisationParser.parse(input);
-      assert(data.sections.Count == 1);
-      assert(data.sections[0].entries.Count == 1);
-      assert(data.sections[0].entries[0].key == "key");
-      assert(data.sections[0].entries[0].value == "value with \"quotes\" in it");
+      assert(data.entries.Count == 1);
+      assert(data.entries[0].key == "key");
+      assert(data.entries[0].value == "value with \"quotes\" in it");
    }
 
    private static void testCreateKey()
    {
       string input = "abc:\n a: \"A\"";
       LocalisationFileData data = LocalisationParser.parse(input);
-      data.sections[0].set("b", "B");
+      data.set("b", "B");
       string serialised = LocalisationSerialiser.serialise(data);
       assert(serialised == "abc:\n a: \"A\"\n b: \"B\"");
    }
@@ -248,11 +245,9 @@ public static class TestLocalisationParser
    private static void testCreateFromScratch()
    {
       LocalisationFileData data = new LocalisationFileData();
-      LocalisationSection section = new LocalisationSection();
-      section.key = "abc";
-      data.sections.Add(section);
-      section.set("a", "A");
-      section.set("b", "B");
+      data.topLevelKey = "abc";
+      data.set("a", "A");
+      data.set("b", "B");
       string serialised = LocalisationSerialiser.serialise(data);
       assert(serialised == "abc:\n a: \"A\"\n b: \"B\"");
    }
@@ -262,17 +257,16 @@ public static class TestLocalisationParser
        string input = "l_english:\n barony_feudal_rimmen: \"Seat\" \n baron_feudal_male_rimmen: \"Master\"";
 
        LocalisationFileData data = LocalisationParser.parse(input);
-       assert(data.sections.Count == 1);
-       assert(data.sections[0].key == "l_english");
-       assert(data.sections[0].entries.Count == 2);
+       assert(data.topLevelKey == "l_english");
+       assert(data.entries.Count == 2);
 
-       assert(data.sections[0].entries[0].key == "barony_feudal_rimmen");
-       assert(data.sections[0].entries[0].number == null);
-       assert(data.sections[0].entries[0].value == "Seat");
+       assert(data.entries[0].key == "barony_feudal_rimmen");
+       assert(data.entries[0].number == null);
+       assert(data.entries[0].value == "Seat");
 
-       assert(data.sections[0].entries[1].key == "baron_feudal_male_rimmen");
-       assert(data.sections[0].entries[1].number == null);
-       assert(data.sections[0].entries[1].value == "Master");
+       assert(data.entries[1].key == "baron_feudal_male_rimmen");
+       assert(data.entries[1].number == null);
+       assert(data.entries[1].value == "Master");
 
        string serialised = LocalisationSerialiser.serialise(data);
        assert(serialised == input);
@@ -283,17 +277,16 @@ public static class TestLocalisationParser
        string input = "l_english:\n empire_mercenary: \"Grand Army\" #of the Republic\n a: \"b\"";
 
        LocalisationFileData data = LocalisationParser.parse(input);
-       assert(data.sections.Count == 1);
-       assert(data.sections[0].key == "l_english");
-       assert(data.sections[0].entries.Count == 2);
+       assert(data.topLevelKey == "l_english");
+       assert(data.entries.Count == 2);
 
-       assert(data.sections[0].entries[0].key == "empire_mercenary");
-       assert(data.sections[0].entries[0].number == null);
-       assert(data.sections[0].entries[0].value == "Grand Army");
+       assert(data.entries[0].key == "empire_mercenary");
+       assert(data.entries[0].number == null);
+       assert(data.entries[0].value == "Grand Army");
 
-       assert(data.sections[0].entries[1].key == "a");
-       assert(data.sections[0].entries[1].number == null);
-       assert(data.sections[0].entries[1].value == "b");
+       assert(data.entries[1].key == "a");
+       assert(data.entries[1].number == null);
+       assert(data.entries[1].value == "b");
 
        string serialised = LocalisationSerialiser.serialise(data);
        assert(serialised == input);
