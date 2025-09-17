@@ -32,14 +32,35 @@ public class Parser
     // This is a simple handwritten recursive descent parser
     //
     // Grammar:
-    // Root                 = ObjectBody $End
-    // ObjectBody           = Item ObjectBody | Nil
-    // Item                 = $String ItemRest | "{" ObjectBody CloseBrace
-    // ItemRest             = Operator AfterOperator | Nil
-    // Operator             = "=" | ">=" | "?=" | "<=" | "==" | "<" | ">"
-    // AfterOperator        = $String MaybeObject | "{" ObjectBody CloseBrace
-    // MaybeObject          = "{" ObjectBody CloseBrace | Nil
-    // CloseBrace           = "}" // this rule exists so we can insert some special logic to handle extra / missing "}" in the top level ObjectBody
+    //     Root                 = ObjectBody $End
+    //     ObjectBody           = Item ObjectBody | Nil
+    //     Item                 = $String ItemRest | "{" ObjectBody CloseBrace
+    //     ItemRest             = Operator AfterOperator | Nil
+    //     Operator             = "=" | ">=" | "?=" | "<=" | "==" | "<" | ">"
+    //     AfterOperator        = $String MaybeObject | "{" ObjectBody CloseBrace
+    //     MaybeObject          = "{" ObjectBody CloseBrace | Nil
+    //     CloseBrace           = "}" // this rule exists so we can insert some special logic to handle extra / missing "}" in the top level ObjectBody
+    //
+    // Firsts:
+    //     Root          = $String "{" $End
+    //     ObjectBody    = $String "{" |
+    //     Item          = $String | "{"
+    //     ItemRest      = "=" ">=" "?=" "<=" "==" "<" ">" |
+    //     Operator      = "=" | ">=" | "?=" | "<=" | "==" | "<" | ">"
+    //     AfterOperator = $String | "{"
+    //     MaybeObject   = "{" |
+    //     CloseBrace    = "}"
+    //
+    // Follows:
+    //     Root          =
+    //     ObjectBody    = "}" $End
+    //     Item          = "{" "}" $End $String
+    //     ItemRest      = "{" "}" $End $String
+    //     Operator      = "{" $String
+    //     AfterOperator = "{" "}" $End $String
+    //     MaybeObject   = "{" "}" $End $String
+    //     CloseBrace    = "{" "}" $End $String
+
 
 
     public static CkObject parse(string inputString)
@@ -141,11 +162,18 @@ public class Parser
             parseOperator(pair);
             parseAfterOperator(pair);
         }
-        else // TODO: assert
+        else if (peek().type == Token.Type.OpenBrace ||
+                 peek().type == Token.Type.CloseBrace ||
+                 peek().type == Token.Type.FileEnd ||
+                 peek().type == Token.Type.String)
         {
             pair.whitespaceBeforeValue = keyToken.ignoredTextBeforeToken;
             pair.valueString = keyToken.stringValue;
             pair.operatorString = null;
+        }
+        else
+        {
+            throw new Exception("unexpected");
         }
 
         obj.valuesList.Add(pair);
@@ -239,10 +267,17 @@ public class Parser
             parseObjectBody(pair.valueObject);
             parseCloseBrace();
         }
-        else // todo: assert
+        else if (peek().type == Token.Type.OpenBrace ||
+                 peek().type == Token.Type.CloseBrace ||
+                 peek().type == Token.Type.FileEnd ||
+                 peek().type == Token.Type.String)
         {
             pair.whitespaceBeforeValue = startToken.ignoredTextBeforeToken;
             pair.valueString = startToken.stringValue;
+        }
+        else
+        {
+            throw new Exception("unexpected");
         }
     }
 
