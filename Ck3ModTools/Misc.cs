@@ -123,10 +123,10 @@ public static class Misc
 
                 mod.name = displayName;
 
-                if (!Directory.Exists(mod.path))
-                    throw new Exception("Mod path not found");
-
-                playset.mods.Add(mod);
+                if (Directory.Exists(mod.path))
+                    playset.mods.Add(mod);
+                else
+                    Console.WriteLine($"Warning: install path not found for mod {mod.name}! Skipping...");
             }
         }
 
