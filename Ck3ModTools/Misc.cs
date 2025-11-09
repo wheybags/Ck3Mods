@@ -41,7 +41,7 @@ public static class Misc
             {
                 // line is something like:
                 // "path"		"C:\\Program Files (x86)\\Steam"
-                string libraryPath = trimmedLine.Substring("\"path\"".Length).Trim().Replace('\\', '/');
+                string libraryPath = trimmedLine.Substring("\"path\"".Length).Trim().Replace("\\\\", "\\").Replace('\\', '/');
                 libraryPath = libraryPath.Substring(1, libraryPath.Length - 2) + "/steamapps/common/Crusader Kings III";
 
                 if (Directory.Exists(libraryPath))
@@ -111,7 +111,7 @@ public static class Misc
                 Mod mod = new Mod();
                 if (steamId != null)
                 {
-                    string steamappsFolder = new DirectoryInfo(gameInstallPath).Parent.Parent.FullName;
+                    string steamappsFolder = new DirectoryInfo(gameInstallPath).Parent.Parent.FullName.Replace("\\", "/");
                     mod.path = steamappsFolder + "/workshop/content/1158310/" + steamId;
                 }
                 else
